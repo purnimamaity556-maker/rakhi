@@ -1,131 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Beautiful Simple Webpage</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-image:url("https://i.pinimg.com/originals/c1/5c/ba/c15cbae66a8a930a1cb292aaf60bb815.jpg");
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: #ffffff;
-      min-height: 150vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 200px;
-    }
-
-    .container {
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 30px;
-      border-radius: 15px;
-      max-width: 700px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    }
-
-    h1 {
-      font-size: 2.5em;
-      color: #ffc107;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      font-size: 1.5em;
-      color: #03a9f4;
-      margin-top: 25px;
-      margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 1.1em;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-
-    img {
-      width: 100%;
-      max-width: 300px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #000;
-      margin: 10px 0;
-    }
-
-    a {
-      color: #4fc3f7;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 12px 25px;
-      font-size: 16px;
-      background-color: #00bcd4;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0097a7;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2em;
-      }
-
-      h2 {
-        font-size: 1.2em;
-      }
-
-      p {
-        font-size: 1em;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Welcome to My Webpage</h1>
-    <p>This page demonstrates HTML, CSS, and JavaScript with a modern design and background image.</p>
+    <h1>CONTACT FORM & TO-DO LIST</h1>
+<div class="container">
 
-    <h2>About Me</h2>
-    <p>I enjoy creating clean and interactive web pages. Here's a sample image I like:</p>
-    <img src="660601.webp" alt="Sample Image" />
+   
+    <div class="card">
+       
+        <h2>Contact Us</h2>
+        <form id="contactForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" placeholder="Your name" required>
 
-    <h2>Useful Link</h2>
-    <p>Visit <a href="https://github.com/purnimamaity556-maker" target="_blank">GITHUB </a>check to my profile</p>
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Your email" required>
 
-    <h2>Try This</h2>
-    <p>Click the button below to see JavaScript in action:</p>
-    <button onclick="showMessage()">Click Me!</button>
-  </div>
+            <label for="message">Message:</label>
+            <textarea id="message" placeholder="Write your message" required></textarea>
 
-  <script>
-    function showMessage() {
-      alert("Hello! This alert was triggered using JavaScript.");
-    }
-  </script>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <!-- To-do List -->
+    <div class="card">
+        
+        <h2>To-Do List</h2>
+        <input type="text" id="taskInput" placeholder="Enter a task">
+        <button id="addTaskBtn">Add Task</button>
+        <ul id="taskList"></ul>
+    </div>
+
+</div>
+<script src="task2.js"></script>
 </body>
 </html>
