@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>To-Do App (Local Storage)</title>
+<style>
+  :root{ --bg:#0b1220; --card:#111a2b; --line:#1e2a42; --text:#e6eefc; --muted:#9fb0cc; --accent:#8ef6d2; }
+  *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .container{max-width:780px;margin:0 auto;padding:1rem}
+  header{position:sticky;top:0;background:#0b1220cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:10}
+  h1{margin:.6rem 0}
+  .row{display:flex;gap:.5rem;flex-wrap:wrap}
+  .card{background:#0e1728;border:1px solid var(--line);border-radius:1rem;padding:1rem}
+  input[type="text"]{flex:1;min-width:200px;padding:.8rem;border-radius:.7rem;border:1px solid var(--line);background:#0c1425;color:var(--text)}
+  button{padding:.7rem 1rem;border-radius:.7rem;border:1px solid var(--line);background:#121f35;color:var(--text);cursor:pointer}
+  button:hover{border-color:#2f436b}
+  .list{margin-top:1rem;display:grid;gap:.5rem}
+  .item{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:.6rem;padding:.6rem;border:1px solid var(--line);border-radius:.6rem;background:#0b1527}
+  .item.completed .title{text-decoration:line-through;color:var(--muted)}
+  .badge{font-size:.75rem;color:var(--muted)}
+  .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+  .muted{color:var(--muted)}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <h1>To-Do App <span class="badge"></span></h1>
+  </div>
+</header>
+<main class="container">
+  <section class="card">
+    <div class="row">
+      <input id="taskInput" type="text" placeholder="What needs to be done?" />
+      <button id="addBtn">Add</button>
+    </div>
+    <div class="filters">
+      <div class="row">
+        <button data-filter="all">All</button>
+        <button data-filter="active">Active</button>
+        <button data-filter="completed">Completed</button>
+      </div>
+      <div class="row" style="margin-left:auto">
+        <input id="search" type="text" placeholder="Search…" />
+        <button id="clearCompleted">Clear Completed</button>
+      </div>
+    </div>
+    <p class="muted" id="counter"></p>
+    <div id="list" class="list" aria-live="polite"></div>
+  </section>
+</main>
+
+<script>
+  const $ = (sel)=>document.querySelector(sel);
+  const listEl = $('#list');
+  const inputEl = $('#taskInput');
+  const searchEl = $('#search');
+  const counterEl = $('#counter');
+  const state = {
+    tasks: JSON.parse(localStorage.getItem('tasks-v1')||'[]'),
+    filter: 'all',
+    search: ''
+  };
+
+  function save(){ localStorage.setItem('tasks-v1', JSON.stringify(state.tasks)); }
+
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+
+  function addTask(title){
+    if(!title.trim()) return;
+    state.tasks.unshift({id:uid(), title:title.trim(), done:false, created:Date.now()});
+    save(); render();
+  }
+
+  function toggleTask(id){ const t = state.tasks.find(t=>t.id===id); if(t){t.done=!t.done; save(); render();} }
+  function deleteTask(id){ state.tasks = state.tasks.filter(t=>t.id!==id); save(); render(); }
+  function editTask(id){
+    const t = state.tasks.find(t=>t.id===id); if(!t) return;
+    const newTitle = prompt('Edit task:', t.title);
+    if(newTitle!==null){ t.title = newTitle.trim(); save(); render(); }
+  }
+  function clearCompleted(){ state.tasks = state.tasks.filter(t=>!t.done); save(); render(); }
+
+  function render(){
+    const term = state.search.toLowerCase();
+    const filtered = state.tasks.filter(t=>{
+      if(state.filter==='active' && t.done) return false;
+      if(state.filter==='completed' && !t.done) return false;
+      if(term && !t.title.toLowerCase().includes(term)) return false;
+      return true;
+    });
+    listEl.innerHTML = '';
+    for(const t of filtered){
+      const item = document.createElement('div');
+      item.className = 'item' + (t.done ? ' completed':'');
+      item.innerHTML = `
+        <input type="checkbox" ${t.done?'checked':''} aria-label="Toggle ${t.title}" />
+        <div class="title">${escapeHtml(t.title)}</div>
+        <button class="edit">Edit</button>
+        <button class="del" aria-label="Delete ${escapeHtml(t.title)}">✕</button>
+      `;
+      const [cb,titleEl,editBtn,delBtn] = item.children;
+      cb.addEventListener('change', ()=>toggleTask(t.id));
+      editBtn.addEventListener('click', ()=>editTask(t.id));
+      delBtn.addEventListener('click', ()=>deleteTask(t.id));
+      listEl.appendChild(item);
+    }
+    const remaining = state.tasks.filter(t=>!t.done).length;
+    counterEl.textContent = `${remaining} task${remaining!==1?'s':''} left • ${state.tasks.length} total`;
+  }
+
+  function escapeHtml(s){ return s.replace(/[&<>"']/g,(m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
+
+  $('#addBtn').addEventListener('click', ()=>addTask(inputEl.value));
+  inputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addTask(inputEl.value); });
+  document.querySelectorAll('[data-filter]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ state.filter = btn.dataset.filter; render(); });
+  });
+  $('#clearCompleted').addEventListener('click', clearCompleted);
+  searchEl.addEventListener('input', ()=>{ state.search = searchEl.value; render(); });
+
+  render();
+</script>
+</body>
+</html>

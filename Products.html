@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Product Listing</title>
+<style>
+  :root{ --bg:#0b1220; --card:#0e1728; --line:#1e2a42; --text:#e6eefc; --muted:#9fb0cc; --accent:#6dd3fb; --star:#facc15; }
+  *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{position:sticky;top:0;background:#0b1220cc;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:10}
+  .container{max-width:1100px;margin:0 auto;padding:1rem}
+  h1{margin:.6rem 0;display:flex;justify-content:space-between;align-items:center}
+  .badge{background:var(--accent);color:#000;padding:.2rem .6rem;border-radius:999px;font-size:.8rem;margin-left:.3rem}
+  .panel{display:grid;grid-template-columns:260px 1fr;gap:1rem}
+  .sidebar{background:var(--card);border:1px solid var(--line);border-radius:1rem;padding:1rem;height:max-content;position:sticky;top:72px}
+  .main{display:grid;gap:1rem}
+  .tools{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+  input[type="text"], select{padding:.6rem .7rem;border-radius:.6rem;border:1px solid var(--line);background:#0c1425;color:var(--text)}
+  .grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:1rem;overflow:hidden}
+  .card img{width:100%;height:150px;object-fit:cover;border-bottom:1px solid var(--line)}
+  .card .p{padding:.8rem}
+  .muted{color:var(--muted)}
+  .price{font-weight:800}
+  .chip{display:inline-block;padding:.15rem .5rem;border:1px solid var(--line);border-radius:999px;font-size:.75rem;color:var(--muted)}
+  .range{width:100%}
+  .footer{text-align:center;color:var(--muted);padding:1rem}
+  .stars{color:var(--star)}
+  .actions{display:flex;gap:.5rem;margin-top:.4rem;flex-wrap:wrap}
+  button{padding:.4rem .7rem;border-radius:.6rem;border:1px solid var(--line);background:#121f35;color:#e6eefc;cursor:pointer}
+  .pagination{display:flex;justify-content:center;gap:.6rem;margin:.5rem 0}
+  /* Modal */
+  .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#0009;display:none;align-items:center;justify-content:center;z-index:100}
+  .modal-content{background:var(--card);border-radius:1rem;padding:1rem;max-width:600px;width:90%;max-height:80%;overflow:auto}
+  .modal-content h2{margin-top:0}
+  .modal-item{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:.4rem 0}
+  .close{float:right;cursor:pointer;color:var(--muted)}
+  @media (max-width:900px){ .panel{grid-template-columns:1fr} .sidebar{position:static} }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <h1>
+      Product Listing <span class="muted">Filter • Sort • Search</span>
+      <span>
+        <button id="openCart">🛒 <span id="cartCount" class="badge">0</span></button>
+        <button id="openWish">❤️ <span id="wishCount" class="badge">0</span></button>
+      </span>
+    </h1>
+  </div>
+</header>
+
+<main class="container panel">
+  <aside class="sidebar">
+    <h3>Filters</h3>
+    <div>
+      <p class="muted">Categories</p>
+      <label><input type="checkbox" class="cat" value="Phones" checked> Phones</label><br>
+      <label><input type="checkbox" class="cat" value="Laptops" checked> Laptops</label><br>
+      <label><input type="checkbox" class="cat" value="Audio" checked> Audio</label><br>
+      <label><input type="checkbox" class="cat" value="Accessories" checked> Accessories</label>
+    </div>
+    <div style="margin-top:.8rem">
+      <p class="muted">Minimum Rating</p>
+      <input id="minRating" type="range" min="1" max="5" step="1" class="range" value="1">
+      <div class="row muted">★ <span id="minRatingVal">1</span>+</div>
+    </div>
+    <div style="margin-top:.8rem">
+      <p class="muted">Max Price: <span id="maxPriceVal"></span></p>
+      <input id="maxPrice" type="range" min="0" max="2000" step="50" class="range" value="2000">
+    </div>
+    <button id="reset" style="margin-top:1rem">Reset</button>
+  </aside>
+
+  <section class="main">
+    <div class="tools">
+      <input id="search" type="text" placeholder="Search products…">
+      <select id="sort">
+        <option value="pop">Sort by: Popular</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="rating-desc">Rating: High to Low</option>
+        <option value="name-asc">Name: A → Z</option>
+      </select>
+      <span id="count" class="muted"></span>
+    </div>
+    <div id="grid" class="grid" aria-live="polite"></div>
+    <div class="pagination">
+      <button id="prev">◀ Prev</button>
+      <span id="pageInfo" class="muted"></span>
+      <button id="next">Next ▶</button>
+    </div>
+    <div class="footer">Client-side demo. Add your own data source later.</div>
+  </section>
+</main>
+
+<!-- Cart Modal -->
+<div id="cartModal" class="modal"><div class="modal-content">
+  <span class="close" data-close="cartModal">✖</span>
+  <h2>Your Cart</h2>
+  <div id="cartList"></div>
+</div></div>
+
+<!-- Wishlist Modal -->
+<div id="wishModal" class="modal"><div class="modal-content">
+  <span class="close" data-close="wishModal">✖</span>
+  <h2>Your Wishlist</h2>
+  <div id="wishList"></div>
+</div></div>
+
+<script>
+  const PRODUCTS = [
+    {id:1,  name:'Pixel 9', category:'Phones', price:799, rating:4.6, img:'https://images.unsplash.com/photo-1727132528094-117c9dceb047?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dauto=format&fit=crop&w=1000&q=60', pop:98},
+    {id:2,  name:'iPhone 15', category:'Phones', price:999, rating:4.8, img:'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1000&q=60', pop:100},
+    {id:3,  name:'Galaxy S24', category:'Phones', price:899, rating:4.7, img:'https://images.unsplash.com/photo-1675285776817-632fb95aff51?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8R2FsYXh5JTIwUzI0fGVufDB8fDB8fHww?auto=format&fit=crop&w=1000&q=60', pop:96},
+    {id:4,  name:'ThinkPad X1', category:'Laptops', price:1499, rating:4.5, img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1000&q=60', pop:92},
+    {id:5,  name:'MacBook Air', category:'Laptops', price:1299, rating:4.9, img:'https://images.unsplash.com/photo-1717865499857-ec35ce6e65fa?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8TWFjQm9vayUyMEFpcnxlbnwwfHwwfHx8MA%3D%3D?auto=format&fit=crop&w=1000&q=60', pop:99},
+    {id:6,  name:'ASUS ZenBook', category:'Laptops', price:1199, rating:4.3, img:'https://images.unsplash.com/photo-1695891888323-661dbe27dc79?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8QVNVUyUyMFplbkJvb2t8ZW58MHx8MHx8fDA%3D?auto=format&fit=crop&w=1000&q=60', pop:88},
+    {id:7,  name:'Noise Cancelling Headphones', category:'Audio', price:249, rating:4.4, img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Tm9pc2UlMjBDYW5jZWxsaW5nJTIwSGVhZHBob25lc3xlbnwwfHwwfHx8MA%3D%3D?auto=format&fit=crop&w=1000&q=60', pop:86},
+    {id:8,  name:'Studio Monitor Headphones', category:'Audio', price:129, rating:4.2, img:'https://images.unsplash.com/photo-1558940298-9220a8299fda?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8U3R1ZGlvJTIwTW9uaXRvciUyMEhlYWRwaG9uZXN8ZW58MHx8MHx8fDA%3D?auto=format&fit=crop&w=1000&q=60', pop:75},
+    {id:9,  name:'Wireless Earbuds', category:'Audio', price:99, rating:4.1, img:'https://images.unsplash.com/photo-1667178173387-7e0cb51c0b4f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8V2lyZWxlc3MlMjBFYXJidWRzfGVufDB8fDB8fHww?auto=format&fit=crop&w=1000&q=60', pop:80},
+    {id:10, name:'USB-C Charger 65W', category:'Accessories', price:39, rating:4.0, img:'https://mojogear.eu/cdn/shop/files/3d99-52bd-4e8b-9d40-423ccba38c19.png?v=1753967103?auto=format&fit=crop&w=1000&q=60', pop:78},
+    {id:11, name:'Mechanical Keyboard', category:'Accessories', price:149, rating:4.6, img:'https://images.unsplash.com/photo-1625130694338-4110ba634e59?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8TWVjaGFuaWNhbCUyMEtleWJvYXJkfGVufDB8fDB8fHww?auto=format&fit=crop&w=1000&q=60', pop:90},
+    {id:12, name:'Ergonomic Mouse', category:'Accessories', price:59, rating:4.3, img:'https://images.unsplash.com/photo-1625750319971-ee4b61e68df8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8RXJnb25vbWljJTIwTW91c2V8ZW58MHx8MHx8fDA%3D?auto=format&fit=crop&w=1000&q=60', pop:82}
+  ];
+
+const el=(s)=>document.querySelector(s);
+const grid=el('#grid'),count=el('#count'),search=el('#search'),sort=el('#sort');
+const minRating=el('#minRating'),minRatingVal=el('#minRatingVal');
+const maxPrice=el('#maxPrice'),maxPriceVal=el('#maxPriceVal');
+const resetBtn=el('#reset');
+const prevBtn=el('#prev'),nextBtn=el('#next'),pageInfo=el('#pageInfo');
+const cartCount=el('#cartCount'),wishCount=el('#wishCount');
+const cartList=el('#cartList'),wishList=el('#wishList');
+
+const state={cats:new Set(['Phones','Laptops','Audio','Accessories']),search:'',sort:'pop',minRating:1,maxPrice:2000,page:1,perPage:6,
+cart:[],wish:new Set(JSON.parse(localStorage.getItem('wishlist')||'[]'))};
+
+function formatPrice(p){return '₹'+p.toLocaleString('en-IN');}
+function renderStars(r){let full=Math.floor(r),half=r%1>=0.5;return '★'.repeat(full)+(half?'½':'')+'☆'.repeat(5-full-(half?1:0));}
+
+function render(){
+  minRatingVal.textContent=state.minRating; maxPriceVal.textContent=formatPrice(state.maxPrice);
+  let items=PRODUCTS.filter(p=>state.cats.has(p.category)&&p.rating>=state.minRating&&p.price<=state.maxPrice);
+  const term=state.search.toLowerCase(); if(term) items=items.filter(p=>(p.name+' '+p.category).toLowerCase().includes(term));
+  switch(state.sort){
+    case'price-asc':items.sort((a,b)=>a.price-b.price);break;
+    case'price-desc':items.sort((a,b)=>b.price-a.price);break;
+    case'rating-desc':items.sort((a,b)=>b.rating-a.rating);break;
+    case'name-asc':items.sort((a,b)=>a.name.localeCompare(b.name));break;
+    default:items.sort((a,b)=>b.pop-a.pop);
+  }
+  const totalPages=Math.ceil(items.length/state.perPage); if(state.page>totalPages) state.page=totalPages||1;
+  const start=(state.page-1)*state.perPage,end=start+state.perPage,pageItems=items.slice(start,end);
+  grid.innerHTML='';
+  for(const p of pageItems){
+    const card=document.createElement('article'); card.className='card';
+    const wished=state.wish.has(p.id);
+    card.innerHTML=`
+      <img alt="${p.name}" src="${p.img}">
+      <div class="p">
+        <div class="row" style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin:.2rem 0">${p.name}</h3><span class="chip">${p.category}</span>
+        </div>
+        <div class="stars">${renderStars(p.rating)} <span class="muted">(${p.rating.toFixed(1)})</span></div>
+        <div class="price">${formatPrice(p.price)}</div>
+        <div class="actions">
+          <button class="buy" data-id="${p.id}">⚡ Buy Now</button>
+          <button class="addCart" data-id="${p.id}">🛒 Add</button>
+          <button class="wish" data-id="${p.id}" style="color:${wished?'red':'#e6eefc'}">❤️</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  }
+  count.textContent=`${items.length} item${items.length!==1?'s':''} found`;
+  pageInfo.textContent=`Page ${state.page} of ${totalPages||1}`;
+  prevBtn.disabled=state.page<=1; nextBtn.disabled=state.page>=totalPages;
+  document.querySelectorAll('.buy').forEach(btn=>btn.onclick=()=>alert("Buying: "+PRODUCTS.find(p=>p.id==btn.dataset.id).name));
+  document.querySelectorAll('.addCart').forEach(btn=>btn.onclick=()=>{state.cart.push(+btn.dataset.id);cartCount.textContent=state.cart.length;});
+  document.querySelectorAll('.wish').forEach(btn=>btn.onclick=()=>{const id=+btn.dataset.id;if(state.wish.has(id))state.wish.delete(id);else state.wish.add(id);
+    localStorage.setItem('wishlist',JSON.stringify([...state.wish]));render();});
+  wishCount.textContent=state.wish.size;
+}
+function showList(type){
+  let listEl=(type=='cart')?cartList:wishList;
+  listEl.innerHTML='';
+  const ids=(type=='cart')?state.cart:state.wish;
+  if(!ids.size && !ids.length){listEl.innerHTML='<p class="muted">No items.</p>';return;}
+  (type=='cart'?ids:[...ids]).forEach(id=>{
+    const p=PRODUCTS.find(x=>x.id==id);
+    if(p){
+      const div=document.createElement('div');div.className='modal-item';
+      div.innerHTML=`<span>${p.name} - ${formatPrice(p.price)}</span>
+      <button data-id="${p.id}">Remove</button>`;
+      listEl.appendChild(div);
+      div.querySelector('button').onclick=()=>{if(type=='cart'){state.cart=state.cart.filter(i=>i!=p.id);}else{state.wish.delete(p.id);localStorage.setItem('wishlist',JSON.stringify([...state.wish]));}
+        render();showList(type);};
+    }
+  });
+}
+document.querySelectorAll('.cat').forEach(cb=>cb.onchange=()=>{if(cb.checked)state.cats.add(cb.value);else state.cats.delete(cb.value);state.page=1;render();});
+search.oninput=()=>{state.search=search.value;state.page=1;render();};
+sort.onchange=()=>{state.sort=sort.value;render();};
+minRating.oninput=()=>{state.minRating=+minRating.value;state.page=1;render();};
+maxPrice.oninput=()=>{state.maxPrice=+maxPrice.value;state.page=1;render();};
+resetBtn.onclick=()=>{state.cats=new Set(['Phones','Laptops','Audio','Accessories']);document.querySelectorAll('.cat').forEach(cb=>cb.checked=true);
+state.search='';search.value='';state.sort='pop';sort.value='pop';state.minRating=1;minRating.value=1;state.maxPrice=2000;maxPrice.value=2000;state.page=1;render();};
+prevBtn.onclick=()=>{state.page--;render();}; nextBtn.onclick=()=>{state.page++;render();};
+el('#openCart').onclick=()=>{el('#cartModal').style.display='flex';showList('cart');};
+el('#openWish').onclick=()=>{el('#wishModal').style.display='flex';showList('wish');};
+document.querySelectorAll('.close').forEach(c=>c.onclick=()=>el('#'+c.dataset.close).style.display='none');
+window.onclick=e=>{if(e.target.classList.contains('modal'))e.target.style.display='none';};
+render();
+</script>
+</body>
+</html>
