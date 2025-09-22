@@ -1,352 +1,287 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="Portfolio of Purnima Maity - BCA Student, Programmer, and Web Developer.">
-    <meta name="keywords" content="Purnima Maity, Portfolio, BCA, Web Developer, Programmer, Student">
-    <meta name="author" content="Purnima Maity">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini E‑commerce</title>
+  <style>
+    :root{
+      --bg:#f6f8fb; --card:#ffffff; --muted:#61708a; --accent:#0066ff; --danger:#e55353; --glass: rgba(255,255,255,0.6);
+      --radius:12px; --maxw:1100px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#eef6ff 0%,var(--bg) 100%);color:#0b1a2b;display:flex;justify-content:center;padding:28px}
+    .wrap{width:100%;max-width:var(--maxw);}
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="index.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <title>Portfolio | Purnima Maity</title>
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{height:46px;width:46px;background:var(--accent);border-radius:10px;display:grid;place-items:center;color:white;font-weight:700}
+    h1{margin:0;font-size:18px}
+    .controls{display:flex;gap:12px;align-items:center}
+    .search{padding:10px 12px;border-radius:10px;border:1px solid #e0e6ef;background:var(--card);min-width:220px}
+    select{padding:10px;border-radius:10px;border:1px solid #e0e6ef}
+    .cart-btn{background:var(--accent);color:white;padding:10px 12px;border-radius:10px;border:none;cursor:pointer}
+
+    main{display:grid;grid-template-columns: 1fr 340px;gap:20px}
+
+    /* products */
+    .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+    .card{background:var(--card);border-radius:14px;padding:12px;border:1px solid rgba(10,20,40,0.04);box-shadow:0 6px 18px rgba(12,24,48,0.04);display:flex;flex-direction:column;gap:10px}
+    .thumb{height:160px;border-radius:10px;background-size:cover;background-position:center}
+    .title{font-weight:600;font-size:14px}
+    .price{font-weight:700}
+    .meta{display:flex;justify-content:space-between;align-items:center}
+    .add{background:linear-gradient(90deg,var(--accent),#4c8bff);border:none;color:white;padding:8px 10px;border-radius:10px;cursor:pointer}
+
+    /* cart */
+    .cart{background:linear-gradient(180deg,rgba(255,255,255,0.85),var(--card));border-radius:14px;padding:12px;border:1px solid rgba(10,20,40,0.04);position:relative}
+    .cart h3{margin:0 0 8px 0}
+    .cart-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;padding-right:6px}
+    .cart-item{display:flex;gap:10px;align-items:center}
+    .cart-item img{width:56px;height:56px;border-radius:8px;object-fit:cover}
+    .qty{display:flex;gap:6px;align-items:center}
+    .qty button{padding:6px 8px;border-radius:8px;border:1px solid #e6eef7;background:transparent;cursor:pointer}
+    .total{display:flex;justify-content:space-between;font-weight:700;padding-top:8px;border-top:1px dashed rgba(10,20,40,0.06);margin-top:10px}
+    .checkout{width:100%;margin-top:10px;padding:10px;border-radius:10px;border:none;cursor:pointer;background:var(--accent);color:white}
+
+    /* product modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(3,6,18,0.45);padding:20px}
+    .modal.active{display:flex}
+    .modal-card{width:100%;max-width:900px;background:var(--card);border-radius:14px;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .modal .thumb{height:320px}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media(max-width:980px){main{grid-template-columns:1fr} .cart{order:2}}
+    @media(max-width:420px){.thumb{height:140px} .modal .thumb{height:220px}}
+
+  </style>
 </head>
-<body oncontextmenu="return false">
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">E</div>
+        <div>
+          <h1>Mini Shop</h1>
+          <div style="font-size:12px;color:var(--muted)"></div>
+        </div>
+      </div>
 
-<header>
-        <a href="#" >Purnima</a>
+      <div class="controls">
+        <input id="search" class="search" placeholder="Search products..." />
+        <select id="category">
+          <option value="all">All categories</option>
+        </select>
+        <select id="sort">
+          <option value="default">Sort: Featured</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+        </select>
+        <button id="open-cart" class="cart-btn">Cart (<span id="cart-count">0</span>)</button>
+      </div>
+    </header>
 
-        <div id="menu" class="fas fa-bars"></div>
-        <nav class="navbar">
-            <ul>
-            <li><a class="active" href="#home">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#skills">Skills</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#education">Education</a></li>
-            <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-</header>
-<!-- navbar ends -->
+    <main>
+      <section>
+        <div id="products" class="products"></div>
+      </section>
 
+      <aside class="cart" id="cart-panel">
+        <h3>Your Cart</h3>
+        <div class="cart-list" id="cart-list">
+          <!-- items -->
+        </div>
+        <div class="total"><span>Subtotal</span><span id="subtotal">₹0.00</span></div>
+        <button id="checkout" class="checkout">Checkout</button>
+      </aside>
+    </main>
+  </div>
 
-<!-- hero section starts -->
-<section class="home" id="home">
-    <div id="particles-js"></div>
-
-    <div class="content">
-    <h2>Hi There,<br/> I'm Purnima <span>Maity</span></h2>
-    <p>i am into <span class="typing-text"></span></p>
-    <a href="#about" class="btn"><span>About Me</span>
-      <i class="fas fa-arrow-circle-down"></i>
-    </a>
-    <div class="socials">
-        <ul class="social-icons">
-          <li><a class="linkedin" aria-label="LinkedIn" href="https://www.linkedin.com/in/purnima-maity-2a5b05379?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank"><i class="fab fa-linkedin"></i></a></li> 
-          <li><a class="fac" aria-label="fac" href="https://www.facebook.com/sona.sona.920456?mibextid=ZbWKwL" target="_blank"><i class="fab fa-facebook"></i></a></li>
-        </ul>
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <div>
+        <div id="modal-image" class="thumb" style="background:#ddd"></div>
+      </div>
+      <div>
+        <h2 id="modal-title"></h2>
+        <p id="modal-desc" style="color:var(--muted)"></p>
+        <div style="margin-top:8px;font-weight:800;font-size:20px" id="modal-price"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="modal-add" class="add">Add to cart</button>
+          <button id="modal-close" class="add" style="background:#e6eef7;color:var(--accent);font-weight:700">Close</button>
+        </div>
       </div>
     </div>
-<div class="image">
-    <img draggable="false" class="tilt" src="WhatsApp Image 2025-09-21 at 18.56.58_36e783bf.jpg" alt="">
-</div>
-</section>
-<!-- hero section ends -->
+  </div>
 
+  <script>
+    // SAMPLE PRODUCT DATA - edit this array to add your own products
+    const PRODUCTS = [
+      {id:1,title:'Classic White T-Shirt',price:399,category:'Clothing',img:'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Q2xhc3NpYyUyMFdoaXRlJTIwVCUyMFNoaXJ0fGVufDB8fDB8fHww?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=8b7b5a1e9cc2c5d1f3c1c6a2f7a8b2e6',desc:'Soft cotton tee, regular fit.'},
+      {id:2,title:'Blue Denim Jeans',price:1299,category:'Clothing',img:'https://plus.unsplash.com/premium_photo-1674828600712-7d0caab39109?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Qmx1ZSUyMERlbmltJTIwSmVhbnN8ZW58MHx8MHx8fDA%3D?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=4a0c4f8b5d3f6a1e3b2c4a5c6d7e8f9a',desc:'Slim-fit denim with stretch.'},
+      {id:3,title:'Running Sneakers',price:2599,category:'Shoes',img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=07b7d4c9e3a2b1d8f5a6e7c3b9a2f0e1',desc:'Lightweight and breathable sneakers.'},
+      {id:4,title:'Smart Watch',price:4999,category:'Electronics',img:'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8U21hcnQlMjBXYXRjaHxlbnwwfHwwfHx8MA%3D%3D?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=9c4f7a7b5c1d2e3f4a5b6c7d8e9f0a1b',desc:'Track your fitness and notifications.'},
+      {id:5,title:'Leather Wallet',price:799,category:'Accessories',img:'https://images.unsplash.com/photo-1636023189308-06668418548d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fExlYXRoZXIlMjBXYWxsZXR8ZW58MHx8MHx8fDA%3D?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=3f2e1d0a9b8c7d6e5f4a3b2c1d0e9f8a',desc:'Elegant bi-fold leather wallet.'},
+      {id:6,title:'Sunglasses',price:1199,category:'Accessories',img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8U3VuZ2xhc3Nlc3xlbnwwfHwwfHx8MA%3D%3D?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d',desc:'UV protection with polarised lenses.'}
+    ];
 
-<!-- about section starts -->
-<section class="about" id="about">
-    <h2 class="heading"><i class="fas fa-user-alt"></i> About <span>Me</span></h2>
-    
-    <div class="row">
+    // --- State ---
+    let state = {
+      products: [...PRODUCTS],
+      cart: JSON.parse(localStorage.getItem('mini_cart')||'{}')
+    };
 
-    <div class="image">
-        <img draggable="false" class="tilt" src="WhatsApp Image 2025-09-21 at 18.56.59_1f9b2c0b.jpg" alt="">
-    </div>
-    <div class="content">
-        <h3>I'm Purnima</h3>
-        <span class="tag">Student</span>
-        
-        <p>I am a student, West Bengal. 
-          I am Bachelor of Computer Application undergraduate from SVU.
-          I am very passionate about improving my coding skills & developing applications & websites.
-          Working for myself to improve my skills.
-          Love to build problem Solving. </p>
-        
-        <div class="box-container">
-            <div class="box">
-              <p><span> age: </span> 20</p>
-              <p><span> phone : </span> +91 9046433833</p>
+    // --- Helpers ---
+    const q = s => document.querySelector(s);
+    const money = v => '₹' + Number(v).toLocaleString('en-IN', {maximumFractionDigits:2});
+
+    // --- Render categories
+    function populateCategories(){
+      const set = new Set(state.products.map(p=>p.category));
+      const sel = q('#category');
+      for(const c of set){
+        const opt = document.createElement('option'); opt.value=c; opt.textContent=c; sel.appendChild(opt);
+      }
+    }
+
+    // --- Render products ---
+    function renderProducts(list){
+      const container = q('#products'); container.innerHTML='';
+      list.forEach(p=>{
+        const el = document.createElement('div'); el.className='card';
+        el.innerHTML = `
+          <div class="thumb" style="background-image:url('${p.img}')"></div>
+          <div class="title">${p.title}</div>
+          <div style="color:var(--muted);font-size:13px">${p.category}</div>
+          <div class="meta">
+            <div>
+              <div class="price">${money(p.price)}</div>
             </div>
-            <div class="box">
-              <p><span> email : </span> purnimamaity556@gmail.com</p>
-              <p><span> place : </span> Purba Medinipur, West Bengal -721422</p>
+            <div>
+              <button class="add" data-id="${p.id}">Add</button>
             </div>
-        </div>
-        
-        <div class="resumebtn">
-            <a href="simple CV.jpg" target="_blank" class="btn"><span>Resume</span>
-                <i class="fas fa-chevron-right"></i>
-            </a>
-        </div>
-
-    </div>
-    </div>
-</section>
-<!-- about section ends -->
-
-<!-- skills section starts -->
-<section class="skills" id="skills">
-
-    <h2 class="heading"><i class="fas fa-laptop-code"></i> Skills & <span>Abilities</span></h2>
-
-    <div class="container">
-          <div class="row" id="skillsContainer">
-<!-- c programming  -->
-            <div class="bar">
-              <div class="info">
-                <img src="download (1).png"width="100rem" height="100rem">
-                <span>C programming</span>
-              </div>
-      </div>
-<!-- c plus plus -->
-      <div class="bar">
-        <div class="info">
-          <img src="icons8-c++-48.png"width="150rem" height="150rem">
-          <span>C plus plus</span>
-        </div>
-</div>
-<!-- python  -->
-<div class="bar">
-  <div class="info">
-    <img src="python-removebg-preview.png"width="150rem" height="150rem">
-    <span>Python</span>
-  </div>
-</div>
-<!-- word -->
-<div class="bar">
-  <div class="info">
-    <img src="word-removebg-preview.png"width="150rem" height="150rem">
-    <span>Microsoft word</span>
-  </div>
-</div>
-<!-- excel -->
-<div class="bar">
-  <div class="info">
-    <img src="excel-removebg-preview.png"width="150rem" height="150rem">
-    <span>Microsoft Excel</span>
-  </div>
-</div>
-<!-- power point -->
-<div class="bar">
-  <div class="info">
-    <img src="powerpoint-removebg-preview.png"width="150rem" height="150rem">
-    <span>Powerpoint</span>
-  </div>
-</div>
-
-<!-- html -->
-<div class="bar">
-  <div class="info">
-    <img src="html-removebg-preview.png"width="150rem" height="150rem">
-    <span>HTML</span>
-  </div>
-</div>
-<!-- css -->
-<div class="bar">
-  <div class="info">
-    <img src="css-removebg-preview.png"width="150rem" height="150rem">
-    <span>CSS</span>
-  </div>
-</div>
-
-<!-- JavaScript -->
-
-<div class="bar">
-  <div class="info">
-    <img src="images-removebg-preview.png"width="150rem" height="150rem">
-    <span>JavaScript</span>
-  </div>
-</div>
- 
-</div>
-</div>
-
-
-</section>
-<!-- skills section ends -->
-
-<!-- projects section starts -->
-<section class="projects" id="projects">
-  <h2 class="heading"><i class="fas fa-code"></i> My <span>Projects</span></h2>
-
-  <div class="box-container">
-
-    <div class="box">
-      <img src="project1.jpg" alt="Project 1">
-      <div class="content">
-        <h3>To Do List</h3>
-        <p>To do List built with HTML, CSS, and JavaScript.</p>
-        <a href="TodoList.html" target="_blank" class="btn">View Project</a>
-      </div>
-    </div>
-
-    <div class="box">
-      <img src="project2.jpg" alt="Project 2">
-      <div class="content">
-        <h3>Products</h3>
-        <p>A Small Online Products built using HTML, CSS, and JavaScript.</p>
-        <a href="Products.html" target="_blank" class="btn">View Project</a>
-      </div>
-    </div>
-
-  </div>
-</section>
-<!-- projects section ends -->
-
-
-<!-- education section starts -->
-<section class="education" id="education">
-
-  <h1 class="heading"><i class="fas fa-graduation-cap"></i> My <span>Education</span></h1>
-
-    <p class="qoute">Education is not the learning of facts, but the training of the mind to think.</p>
-
-    <div class="box-container">
-
-    <div class="box">
-        <div class="image">
-        <img draggable="false" src="images (1).jpg" alt="">
-        </div>
-        <div class="content">
-        <h3>Bachelor of Computer Application</h3>
-        <p>Swami Vivekananda University | SVU</p>
-        <h4>2023-2027 | Pursuing</h4>
-        </div>
-    </div>
-
-    <div class="box">
-      <div class="image">
-      <img draggable="false" src="WhatsApp Image 2025-09-21 at 20.18.40_33346788.jpg" alt="">
-      </div>
-      <div class="content">
-      <h3>Higher Secondary | Arts</h3>
-      <p>Astichak Surendra Jogendra Vidyapith | H.S</p>
-      <h4>2022-2023 | Completed</h4>
-      </div>
-    </div>
-
-</div>
-</section>
-<!-- contact section starts -->
-<section class="contact" id="contact">
-  
-  <h2 class="heading"><i class="fas fa-headset"></i> Get in <span>Touch</span></h2>
-
-  <div class="container">
-    <div class="content">
-      <div class="image-box">
-        <img draggable="false" src="contact1.png" alt="">
-      </div>
-    <form id="contact-form">
-      
-      <div class="form-group">
-        <div class="field">
-          <input type="text" name="name" placeholder="Name" required>
-          <i class='fas fa-user'></i>
-        </div>
-        <div class="field">
-          <input type="text" name="email" placeholder="Email" required>
-          <i class='fas fa-envelope'></i>
-        </div>
-        <div class="field">
-          <input type="text" name="phone" placeholder="Phone">
-          <i class='fas fa-phone-alt'></i>
-        </div>
-        <div class="message">
-        <textarea placeholder="Message" name="message" required></textarea>
-        <i class="fas fa-comment-dots"></i>
-        </div>
-        </div>
-      <div class="button-area">
-        <button type="submit">
-          Submit <i class="fa fa-paper-plane"></i></button>
-      </div>
-    </form>
-  </div>
-  </div>
-</section>
-<!-- contact section ends -->
-
-
-<!-- footer section starts -->
-<section class="footer">
-
-  <div class="box-container">
-
-      <div class="box">
-          <h3>Purnima Portfolio</h3>
-          <p>Thank you for visiting my personal portfolio website. Connect with me over socials. <br/> <br/> Keep Rising 🚀. Connect with me over live chat!</p>
-      </div>
-
-      <div class="box">
-          <h3>quick links</h3>
-          <a href="#home"><i class="fas fa-chevron-circle-right"></i> home</a>
-          <a href="#about"><i class="fas fa-chevron-circle-right"></i> about</a>
-          <a href="#skills"><i class="fas fa-chevron-circle-right"></i> skills</a>
-          <a href="#projects"><i class="fas fa-chevron-circle-right"></i>Projects</a>
-          <a href="#education"><i class="fas fa-chevron-circle-right"></i> education</a>
-      </div>
-
-      <div class="box">
-          <h3>contact info</h3>
-          <p> <i class="fas fa-phone"></i>+91 9046433833</p>
-          <p> <i class="fas fa-envelope"></i>purnimamaity556@gmail.com</p>
-          <p> <i class="fas fa-map-marked-alt"></i>Purba Medinipur, West Bengal-721422</p>
-          <div class="share">
-
-              <a href="https://www.linkedin.com/in/purnima-maity-2a5b05379?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" class="fab fa-linkedin" aria-label="LinkedIn" target="_blank">
-              <a href="mailto:purnimamaity556@gmail.com" class="fas fa-envelope" aria-label="Femail"></a>
-              <a href="https://www.facebook.com/sona.sona.920456?mibextid=ZbWKwL" class="fab fa-facebook" aria-label="facebook" target="_blank"></a>
           </div>
-      </div>
-  </div>
+        `;
+        // click to open modal
+        el.querySelector('.thumb').addEventListener('click',()=>openModal(p.id));
+        el.querySelector('.add').addEventListener('click',()=>addToCart(p.id));
+        container.appendChild(el);
+      })
+    }
 
-  <h1 class="credit">Designed with <i class="fa fa-heart pulse"></i> by <a href="https://www.linkedin.com/in/purnima-maity-2a5b05379?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app">Purnima Maity</a></h1>
+    // --- Cart operations ---
+    function saveCart(){ localStorage.setItem('mini_cart', JSON.stringify(state.cart)); updateCartUI(); }
 
-</section>
-<!-- footer section ends -->
+    function addToCart(id,qty=1){
+      const key = String(id);
+      if(state.cart[key]) state.cart[key].qty += qty;
+      else {
+        const p = state.products.find(x=>x.id===id);
+        state.cart[key] = {id:p.id,title:p.title,price:p.price,img:p.img,qty:qty};
+      }
+      saveCart();
+      showToast('Added to cart');
+    }
 
+    function removeFromCart(id){ delete state.cart[String(id)]; saveCart(); }
+    function changeQty(id,delta){ const k=String(id); if(!state.cart[k]) return; state.cart[k].qty += delta; if(state.cart[k].qty<1) delete state.cart[k]; saveCart(); }
 
-<!-- scroll top btn -->
-<a href="#home" aria-label="ScrollTop" class="fas fa-angle-up" id="scroll-top"></a>
-<!-- scroll back to top -->
+    function clearCart(){ state.cart = {}; saveCart(); }
 
+    // --- UI update ---
+    function updateCartUI(){
+      const list = q('#cart-list'); list.innerHTML='';
+      const items = Object.values(state.cart);
+      let subtotal = 0, count = 0;
+      if(items.length===0) list.innerHTML='<div style="color:var(--muted)">Your cart is empty.</div>';
+      items.forEach(it=>{
+        subtotal += it.price*it.qty; count += it.qty;
+        const row = document.createElement('div'); row.className='cart-item';
+        row.innerHTML = `
+          <img src="${it.img}" alt="">
+          <div style="flex:1">
+            <div style="font-weight:700">${it.title}</div>
+            <div style="color:var(--muted);font-size:13px">${money(it.price)}</div>
+          </div>
+          <div class="qty">
+            <button data-action="dec" data-id="${it.id}">-</button>
+            <div>${it.qty}</div>
+            <button data-action="inc" data-id="${it.id}">+</button>
+            <button data-action="del" data-id="${it.id}" style="margin-left:8px;background:transparent;border:none;color:var(--danger);cursor:pointer">✕</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+      q('#subtotal').textContent = money(subtotal);
+      q('#cart-count').textContent = count;
 
-<!-- ==== ALL MAJOR JAVASCRIPT CDNS STARTS ==== -->
-<!-- jquery cdn -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      // attach qty buttons
+      list.querySelectorAll('button[data-action]').forEach(btn=>{
+        const act = btn.getAttribute('data-action'); const id = Number(btn.getAttribute('data-id'));
+        btn.addEventListener('click',()=>{
+          if(act==='inc') changeQty(id,1);
+          if(act==='dec') changeQty(id,-1);
+          if(act==='del') removeFromCart(id);
+        });
+      });
+    }
 
-<!-- typed.js cdn -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.5/typed.min.js" integrity="sha512-1KbKusm/hAtkX5FScVR5G36wodIMnVd/aP04af06iyQTkD17szAMGNmxfNH+tEuFp3Og/P5G32L1qEC47CZbUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    // --- Modal ---
+    function openModal(id){
+      const p = state.products.find(x=>x.id===id);
+      q('#modal').classList.add('active');
+      q('#modal-image').style.backgroundImage = `url('${p.img}')`;
+      q('#modal-title').textContent = p.title;
+      q('#modal-desc').textContent = p.desc;
+      q('#modal-price').textContent = money(p.price);
+      q('#modal-add').onclick = ()=>{ addToCart(p.id); q('#modal').classList.remove('active'); };
+    }
+    q('#modal-close').addEventListener('click',()=>q('#modal').classList.remove('active'));
+    q('#modal').addEventListener('click',(e)=>{ if(e.target===q('#modal')) q('#modal').classList.remove('active'); });
 
-<!-- vanilla tilt.js links -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js" integrity="sha512-SttpKhJqONuBVxbRcuH0wezjuX+BoFoli0yPsnrAADcHsQMW8rkR84ItFHGIkPvhnlRnE2FaifDOUw+EltbuHg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    // --- Search / Filter / Sort ---
+    function applyFilters(){
+      const qstr = q('#search').value.trim().toLowerCase();
+      const cat = q('#category').value;
+      const sort = q('#sort').value;
+      let out = state.products.filter(p=> (p.title.toLowerCase().includes(qstr) || p.desc.toLowerCase().includes(qstr)) && (cat==='all' ? true : p.category===cat) );
+      if(sort==='price-asc') out.sort((a,b)=>a.price-b.price);
+      if(sort==='price-desc') out.sort((a,b)=>b.price-a.price);
+      renderProducts(out);
+    }
 
-<!-- scroll reveal anim -->
-<script src="https://unpkg.com/scrollreveal"></script>
+    // --- small toast for feedback ---
+    function showToast(msg){
+      const t = document.createElement('div'); t.textContent=msg; t.style.cssText='position:fixed;right:18px;bottom:18px;padding:10px 12px;background:#122b4a;color:white;border-radius:10px;box-shadow:0 8px 20px rgba(8,18,40,0.2)';
+      document.body.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(8px)'; setTimeout(()=>t.remove(),400) },1200);
+    }
 
-<script
-      type="text/javascript"
-      src="purnimamaity556@gmail.com"
-    ></script>
+    // --- Checkout simulation ---
+    q('#checkout').addEventListener('click',()=>{
+      const items = Object.values(state.cart);
+      if(items.length===0){ showToast('Cart is empty'); return; }
+      // Simulate checkout success
+      alert('Checkout simulated — thank you for your purchase!');
+      clearCart();
+    });
 
-<!-- ==== ALL MAJOR JAVASCRIPT CDNS ENDS ==== -->
+    // open/close cart panel on small screens
+    q('#open-cart').addEventListener('click',()=>{
+      const panel = q('#cart-panel'); if(window.innerWidth<=980){ panel.scrollIntoView({behavior:'smooth'});} else panel.style.boxShadow = '0 12px 40px rgba(9,20,40,0.06)';
+    });
 
-<script src="index.js"></script>
+    // wire up search/filter events
+    q('#search').addEventListener('input',applyFilters);
+    q('#category').addEventListener('change',applyFilters);
+    q('#sort').addEventListener('change',applyFilters);
 
+    // init
+    populateCategories(); renderProducts(state.products); updateCartUI();
+
+  </script>
 </body>
 </html>
